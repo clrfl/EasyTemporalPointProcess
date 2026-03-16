@@ -105,7 +105,8 @@ class TPPDataLoader:
 
             data = load_dataset(source_dir.split('/')[0] + "/" + source_dir.split('/')[1],
                                 data_dir=source_dir.split('/')[2],
-                                split=split_mapped)
+                                split=split_mapped,
+                                token='...')
         else:
             raise ValueError("Unsupported source directory format.")
 
