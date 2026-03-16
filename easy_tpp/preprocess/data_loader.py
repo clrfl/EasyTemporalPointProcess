@@ -35,6 +35,8 @@ class TPPDataLoader:
             return self._build_input_from_pkl(source_dir, split)
         elif data_format == 'json':
             return self._build_input_from_json(source_dir, split)
+        elif data_format == 'parquet':
+            return self._build_input_from_parquet(source_dir, split)
         else:
             raise ValueError(f"Unsupported file format: {data_format}")
 
@@ -77,6 +79,35 @@ class TPPDataLoader:
             data = load_dataset(source_dir, split=split_mapped)
         else:
             raise ValueError("Unsupported source directory format for JSON.")
+
+        py_assert(data['dim_process'][0] == self.num_event_types,
+                  ValueError, "Inconsistent dim_process in different splits.")
+
+        return {
+            'time_seqs': data['time_since_start'],
+            'type_seqs': data['type_event'],
+            'time_delta_seqs': data['time_since_last_event']
+        }
+
+    def _build_input_from_parquet(self, source_dir, split):
+        """Load and process data from a parquet file.
+
+        Args:
+            source_dir (str): Path to the parquet file or Hugging Face dataset name.
+            split (str): Dataset split, e.g., 'train', 'dev', 'test'.
+
+        Returns:
+            dict: Dictionary with processed event sequences.
+        """
+        from datasets import load_dataset
+        if source_dir.split('.')[-1] != 'parquet':
+            split_mapped = 'validation' if split == 'dev' else split
+
+            data = load_dataset(source_dir.split('/')[0] + "/" + source_dir.split('/')[1],
+                                data_dir=source_dir.split('/')[2],
+                                split=split_mapped)
+        else:
+            raise ValueError("Unsupported source directory format.")
 
         py_assert(data['dim_process'][0] == self.num_event_types,
                   ValueError, "Inconsistent dim_process in different splits.")
