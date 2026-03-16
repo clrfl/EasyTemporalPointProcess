@@ -104,9 +104,8 @@ class TPPDataLoader:
             split_mapped = 'validation' if split == 'dev' else split
 
             data = load_dataset(source_dir.split('/')[0] + "/" + source_dir.split('/')[1],
-                                data_dir=source_dir.split('/')[2],
-                                split=split_mapped,
-                                token='...')
+                                source_dir.split('/')[2],
+                                split=split_mapped)
         else:
             raise ValueError("Unsupported source directory format.")
 
